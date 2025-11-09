@@ -1,0 +1,6 @@
+@N_Tier_HostAddress = http://localhost:5266/api
+
+GET {{N_Tier_HostAddress}}/Test
+Accept: application/json
+
+###
