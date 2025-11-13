@@ -99,7 +99,7 @@ http://localhost:5000
 
 ### 5️⃣ Lancement via Docker
 
-Démarrer les conteneurs Docker (API + Base de données, selon le `docker-compose.yml`) :
+Démarrer les conteneurs Docker (Base de données, selon le `docker-compose.yml`) :
 ```bash
 docker compose up -d
 ```

@@ -7,7 +7,7 @@ namespace N_Tier.API.Controllers
 {
     [ApiController]
     [Route("users")]
-    [Authorize] // équivalent à .RequireAuthorization()
+    [Authorize]
     public class UsersController : ControllerBase
     {
         private readonly IUserService _userService;
