@@ -6,48 +6,78 @@ using N_Tier.DAL.Interfaces;
 
 namespace N_Tier.BLL.Services;
 
-public class OrderService : IOrderService
-{ 
-    private readonly IOrderRepository _orderRepository;
-    private readonly UserManager<User> _userManager;
-
-    public OrderService(IOrderRepository orderRepository, UserManager<User> userManager)
-    {
-        _orderRepository = orderRepository;
-        _userManager = userManager;
-    }
-
+public class OrderService(
+    IOrderRepository orderRepository,
+    UserManager<User> userManager,
+    IProductRepository productRepository,
+    IOrderService orderService)
+    : IOrderService
+{
     public async Task<Order> GetByIdAsync(Guid id)
     {
-        return await _orderRepository.GetByIdAsync(id);
+        return await orderRepository.GetByIdAsync(id);
+    }
+
+    public async Task<OrderUpDto[]> GetByUserIdAsync(string userId)
+    {
+        var orders = await orderRepository.GetByUserIdAsync(userId);
+        
+        var orderDtos = orders.Select(o => new OrderUpDto
+        {
+            Id = o.Id,
+            Created = o.Created,
+            Modified = o.Modified,
+            OrderProducts = o.OrderProducts.Select(op => new OrderProductDto
+            {
+                ProductId = op.ProductId,
+                Quantity = op.Quantity
+            }).ToList()
+        }).ToList();
+        
+        return orderDtos.ToArray();
     }
 
     public async Task AddAsync(OrderDto order)
     {
-        var user = await _userManager.FindByIdAsync(order.idUser);
+        var user = await userManager.FindByIdAsync(order.idUser);
         if (user == null)
             throw new Exception("Utilisateur introuvable");
-
-        float total = 0;
-        foreach (var orderProduct in order.OrderProducts)
-        {
-            total += (orderProduct.Product.Price  * orderProduct.Quantity);
-        }
-
+        
         var orderEntity = new Order()
         {
             Id = new Guid(),
             Modified = new DateTime(),
             Created = new DateTime(),
-            OrderProducts =  order.OrderProducts,
-            User = user ,
-            TotalOrder = total,
+            User = user,
         };
-        await _orderRepository.AddAsync(orderEntity);
+        
+        var orderProducts = new List<OrderProduct>();
+        
+        foreach (var op in order.OrderProducts)
+        {
+            var product = await productRepository.GetByIdAsync(op.ProductId);
+            if (product == null)
+                throw new Exception($"Produit introuvable: {op.ProductId}");
+            orderProducts.Add(new OrderProduct
+            {
+                OrderId = orderEntity.Id,
+                Order = orderEntity,
+                ProductId = op.ProductId,
+                Product = product,
+                Quantity = op.Quantity
+            });
+        }
+        
+        orderEntity.OrderProducts = orderProducts;
+        
+        await orderRepository.AddAsync(orderEntity);
     }
 
     public async Task DeleteAsync(Guid id)
     {
-        await _orderRepository.DeleteAsync(id);
+        var order = await orderService.GetByIdAsync(id);
+        if (order == null)
+            throw new Exception("Commande introuvable");
+        await orderRepository.DeleteAsync(id);
     }
 }

@@ -5,37 +5,43 @@ using N_Tier.DAL.Repository;
 
 namespace N_Tier.DAL.Repositories
 {
-    public class OrderRepository : IOrderRepository
+    public class OrderRepository(ApplicationDbContext context) : IOrderRepository
     {
-        private readonly ApplicationDbContext _context;
-
-        public OrderRepository(ApplicationDbContext context)
+        public async Task<Order?> GetByIdAsync(Guid id)
         {
-            _context = context;
-        }
-        
-        public async Task<Order> GetByIdAsync(Guid id)
-        {
-            return await _context.Orders
+            return await context.Orders
                 .Include(o => o.OrderProducts)
-                .FirstOrDefaultAsync(o => o.Id == id);
+                .SingleOrDefaultAsync(o => o.Id == id);
+        }
+
+        public async Task<IEnumerable<Order>> GetByUserIdAsync(string userId)
+        {
+            var orders = await context.Orders
+                .Where(o => o.User.Id == userId)
+                .Include(o => o.OrderProducts)
+                .ToListAsync();
+            if (orders == null || orders.Count == 0)
+            {
+                throw new Exception("No orders found for the specified user.");
+            }
+            return orders;
         }
         
         public async Task<IEnumerable<Order>> GetAllAsync()
         {
-            return await _context.Orders.Include(o => o.OrderProducts).ToListAsync();
+            return await context.Orders.Include(o => o.OrderProducts).ToListAsync();
         }
 
         public async Task AddAsync(Order order)
         {
-            await _context.Orders.AddAsync(order);
-            await _context.SaveChangesAsync();
+            await context.Orders.AddAsync(order);
+            await context.SaveChangesAsync();
         }
 
         public async Task UpdateAsync(Order order)
         {
-            _context.Orders.Update(order);
-            await _context.SaveChangesAsync();
+            context.Orders.Update(order);
+            await context.SaveChangesAsync();
         }
 
         public async Task DeleteAsync(Guid id)
@@ -43,8 +49,8 @@ namespace N_Tier.DAL.Repositories
             var order = await GetByIdAsync(id);
             if (order != null)
             {
-                _context.Orders.Remove(order);
-                await _context.SaveChangesAsync();
+                context.Orders.Remove(order);
+                await context.SaveChangesAsync();
             }
         }
         
