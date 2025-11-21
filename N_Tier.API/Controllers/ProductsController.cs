@@ -19,16 +19,7 @@ public class ProductsController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetAllProducts(int page = 1, int pageSize = 10)
     {
-        var (items, totalCount) = await _productService.GetPagedAsync(page, pageSize);
-
-        return Ok(new
-        {
-            page,
-            pageSize,
-            totalCount,
-            totalPages = (int)Math.Ceiling(totalCount / (double)pageSize),
-            data = items
-        });
+        return Ok(await _productService.GetPagedAsync(page, pageSize));
     }
 
     [HttpGet("{id}")]

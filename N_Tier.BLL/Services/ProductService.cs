@@ -7,9 +7,18 @@ namespace N_Tier.BLL.Manager.Services;
 
 public class ProductService(IProductRepository productRepository) : IProductService
 {
-    public async Task<(List<Product> Items, int TotalCount)> GetPagedAsync(int page, int pageSize)
+    public async Task<ProductPaginationUpDto> GetPagedAsync(int page, int pageSize)
     {
-        return await productRepository.GetPagedAsync(page, pageSize);
+        var (items, totalCount) =  await productRepository.GetPagedAsync(page, pageSize);
+        
+        return  new ProductPaginationUpDto
+        {
+            Page = page,
+            PageSize = pageSize,
+            PageCount = (int)Math.Ceiling(totalCount / (double)pageSize),
+            TotalCount = totalCount,
+            data = items.ToArray()
+        };
     }
 
 
