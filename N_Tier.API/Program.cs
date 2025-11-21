@@ -33,8 +33,7 @@ builder.Services.AddIdentityCore<User>()
 
 // Database Context
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"),
-        b => b.MigrationsAssembly("N_Tier.DAL")
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")
     ));
 
 // Repositories
@@ -43,11 +42,6 @@ builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 
 // Managers (BLL)
-builder.Services.AddScoped<IProductService, ProductService>();
-builder.Services.AddScoped<IOrderService, OrderService>();
-builder.Services.AddScoped<IUserService, UserService>();
-
-// Services (Application Layer)
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<IUserService, UserService>();
@@ -66,6 +60,7 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();   
     app.MapScalarApiReference();
     app.ApplyMigrations();
+    await app.SeedAsync();
 }
 
 app.UseHttpsRedirection();
