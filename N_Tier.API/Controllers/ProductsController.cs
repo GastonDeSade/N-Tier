@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using N_Tier.BLL.DTOs;
+using N_Tier.BLL.Entities;
 using N_Tier.BLL.Manager.Interfaces.Services;
 
 namespace N_Tier.API.Controllers;
@@ -31,18 +32,26 @@ public class ProductsController : ControllerBase
     }
 
     [HttpGet("{id}")]
-    public async Task<IActionResult> GetProduct(Guid id)
+    public async Task<IActionResult> GetProductById(Guid id)
     {
         var product = await _productService.GetByIdAsync(id);
         if (product == null) return NotFound();
         return Ok(product);
     }
 
+    [HttpGet("{name}/by-name")]
+    public async Task<IActionResult> GetProductByName(string name)
+    {
+        Product[] product = await _productService.GetByNameAsync(name);
+        if (product == null) return NotFound();
+        return Ok(product);
+    }
+    
     [HttpPost]
     public async Task<IActionResult> CreateProduct([FromBody] ProductDto productDto)
     {
         var product = await _productService.AddAsync(productDto);
-        return CreatedAtAction(nameof(GetProduct), new { id = product.Id }, product);
+        return CreatedAtAction(nameof(GetProductById), new { id = product.Id }, product);
     }
 
     [HttpPut("{id}")]
