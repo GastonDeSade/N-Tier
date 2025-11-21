@@ -5,25 +5,23 @@ using N_Tier.DAL.Interfaces;
 
 namespace N_Tier.BLL.Manager.Services;
 
-public class ProductService: IProductService
+public class ProductService(IProductRepository productRepository) : IProductService
 {
-    private readonly IProductRepository _productRepository;
-
-    public ProductService(IProductRepository productRepository)
-    {
-        _productRepository = productRepository;
-    }
-
-
     public async Task<(List<Product> Items, int TotalCount)> GetPagedAsync(int page, int pageSize)
     {
-        return await _productRepository.GetPagedAsync(page, pageSize);
+        return await productRepository.GetPagedAsync(page, pageSize);
     }
 
 
     public async Task<Product> GetByIdAsync(Guid id)
     {
-        return await _productRepository.GetByIdAsync(id);
+        return await productRepository.GetByIdAsync(id);
+    }
+    
+    public async Task<Product[]> GetByNameAsync(string name)
+    {
+        var (items, _) = await productRepository.GetPagedAsync(1, 100);
+        return items.Where(p => p.Name.Equals(name, StringComparison.OrdinalIgnoreCase)).ToArray();
     }
 
     public async Task<Product> AddAsync(ProductDto productDto)
@@ -33,15 +31,19 @@ public class ProductService: IProductService
             Id = Guid.NewGuid(),
             Name = productDto.Name,
             Description = productDto.Description,
-            Price = productDto.Price
+            Price = productDto.Price,
+            Image = productDto.Image,
+            Image2 = productDto.Image2,
+            Image3 = productDto.Image3,
+            Image4 = productDto.Image4
         };
-        await _productRepository.AddAsync(product);
+        await productRepository.AddAsync(product);
         return product;
     }
 
     public async Task UpdateAsync(ProductDto product)
     {
-        var productToUpdate = await _productRepository.GetByIdAsync(product.Id);
+        var productToUpdate = await productRepository.GetByIdAsync(product.Id);
         if (productToUpdate == null)
         {
             throw new Exception("Product not found");
@@ -49,11 +51,11 @@ public class ProductService: IProductService
         productToUpdate.Name = product.Name;
         productToUpdate.Description = product.Description;
         productToUpdate.Price = product.Price;
-        await _productRepository.UpdateAsync(productToUpdate);
+        await productRepository.UpdateAsync(productToUpdate);
     }
 
     public async Task DeleteAsync(Guid id)
     {
-        await _productRepository.DeleteAsync(id);
+        await productRepository.DeleteAsync(id);
     }
 }
