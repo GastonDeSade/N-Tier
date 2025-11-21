@@ -9,9 +9,9 @@ namespace N_Tier.API.Controllers;
 public class OrdersController(IOrderService orderService) : ControllerBase
 {
     [HttpPost]
-    public async Task<IActionResult> CreateOrder(OrderDownDto order)
+    public async Task<IActionResult> CreateOrder(OrderDownDto orderDownDto)
     { 
-        await orderService.AddAsync(order);
+        OrderUpDto order = await orderService.AddAsync(orderDownDto);
         return Created((Uri?)null, order);
     }
 
@@ -34,7 +34,6 @@ public class OrdersController(IOrderService orderService) : ControllerBase
     [HttpDelete]
     public async Task<IActionResult> DeleteOrder(Guid id)
     {
-
         await orderService.DeleteAsync(id);
         return NoContent();
     }

@@ -37,7 +37,7 @@ public class OrderService(
         return orderDtos.ToArray();
     }
 
-    public async Task AddAsync(OrderDownDto order)
+    public async Task<OrderUpDto> AddAsync(OrderDownDto order)
     {
         var user = await userManager.FindByIdAsync(order.idUser);
         if (user == null)
@@ -71,6 +71,18 @@ public class OrderService(
         orderEntity.OrderProducts = orderProducts;
         
         await orderRepository.AddAsync(orderEntity);
+        
+        return new OrderUpDto()
+        {
+            Id = orderEntity.Id,
+            Created = orderEntity.Created,
+            Modified = orderEntity.Modified,
+            OrderProducts = orderEntity.OrderProducts.Select(op => new OrderProductDownDto
+            {
+                ProductId = op.ProductId,
+                Quantity = op.Quantity
+            }).ToList()
+        };
     }
 
     public async Task DeleteAsync(Guid id)
