@@ -7,6 +7,6 @@ public interface IOrderService
 {
     Task<Order> GetByIdAsync(Guid id);
     Task<OrderUpDto[]> GetByUserIdAsync(string userId);
-    Task AddAsync(OrderDto order);
+    Task AddAsync(OrderDownDto order);
     Task DeleteAsync(Guid id);
 }

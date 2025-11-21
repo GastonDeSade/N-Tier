@@ -2,8 +2,8 @@ using N_Tier.BLL.Entities;
 
 namespace N_Tier.BLL.DTOs;
 
-public class OrderDto
+public class OrderDownDto
 {
     public string idUser { get; set; }
-    public List<OrderProduct> OrderProducts { get; set; }
+    public List<OrderProductDownDto> OrderProducts { get; set; }
 }

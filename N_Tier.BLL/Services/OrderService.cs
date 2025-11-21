@@ -27,7 +27,7 @@ public class OrderService(
             Id = o.Id,
             Created = o.Created,
             Modified = o.Modified,
-            OrderProducts = o.OrderProducts.Select(op => new OrderProductDto
+            OrderProducts = o.OrderProducts.Select(op => new OrderProductDownDto
             {
                 ProductId = op.ProductId,
                 Quantity = op.Quantity
@@ -37,7 +37,7 @@ public class OrderService(
         return orderDtos.ToArray();
     }
 
-    public async Task AddAsync(OrderDto order)
+    public async Task AddAsync(OrderDownDto order)
     {
         var user = await userManager.FindByIdAsync(order.idUser);
         if (user == null)
