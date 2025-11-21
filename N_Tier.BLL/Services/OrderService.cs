@@ -9,8 +9,7 @@ namespace N_Tier.BLL.Services;
 public class OrderService(
     IOrderRepository orderRepository,
     UserManager<User> userManager,
-    IProductRepository productRepository,
-    IOrderService orderService)
+    IProductRepository productRepository)
     : IOrderService
 {
     public async Task<Order> GetByIdAsync(Guid id)
@@ -87,7 +86,7 @@ public class OrderService(
 
     public async Task DeleteAsync(Guid id)
     {
-        var order = await orderService.GetByIdAsync(id);
+        var order = await GetByIdAsync(id);
         if (order == null)
             throw new Exception("Commande introuvable");
         await orderRepository.DeleteAsync(id);
